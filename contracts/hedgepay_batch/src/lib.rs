@@ -79,6 +79,14 @@ impl HedgePayBatch {
     pub fn batch_counter(env: Env) -> u64 {
         get_batch_counter(&env)
     }
+
+    pub fn update_admin(env: Env, new_admin: Address) {
+        let admin = get_admin(&env).unwrap_or_else(|| {
+            panic_with_error!(&env, Error::NotInitialized);
+        });
+        admin.require_auth();
+        set_admin(&env, &new_admin);
+    }
 }
 
 fn get_admin(env: &Env) -> Option<Address> {
