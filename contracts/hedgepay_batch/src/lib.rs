@@ -43,3 +43,14 @@ pub struct BatchRequest {
     pub declared_total: i128,
     pub batch_id: u64,
 }
+
+#[contract]
+pub struct HedgePayBatch;
+
+#[contractimpl]
+impl HedgePayBatch {
+    pub fn initialize(env: Env, admin: Address, treasury: Address, token: Address) {
+        // empty skeleton for now
+    }
+}
+
