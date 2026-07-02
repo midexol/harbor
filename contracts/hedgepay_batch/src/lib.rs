@@ -162,6 +162,10 @@ impl HedgePayBatch {
             (symbol_short!("executed"), env.current_contract_address()),
             (request.batch_id, request.declared_total, request.items.len() as u32),
         );
+
+        // Increment batch counter
+        let counter = get_batch_counter(&env);
+        set_batch_counter(&env, counter + 1);
     }
 }
 
