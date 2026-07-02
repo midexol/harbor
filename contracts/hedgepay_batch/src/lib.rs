@@ -87,6 +87,14 @@ impl HedgePayBatch {
         admin.require_auth();
         set_admin(&env, &new_admin);
     }
+
+    pub fn update_treasury(env: Env, new_treasury: Address) {
+        let admin = get_admin(&env).unwrap_or_else(|| {
+            panic_with_error!(&env, Error::NotInitialized);
+        });
+        admin.require_auth();
+        set_treasury(&env, &new_treasury);
+    }
 }
 
 fn get_admin(env: &Env) -> Option<Address> {
