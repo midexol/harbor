@@ -75,6 +75,10 @@ impl HedgePayBatch {
     pub fn max_batch_size(env: Env) -> u32 {
         get_max_batch_size(&env)
     }
+
+    pub fn batch_counter(env: Env) -> u64 {
+        get_batch_counter(&env)
+    }
 }
 
 fn get_admin(env: &Env) -> Option<Address> {
