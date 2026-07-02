@@ -123,6 +123,10 @@ impl HedgePayBatch {
                 panic_with_error!(&env, Error::InvalidAmount);
             });
         }
+
+        if computed_sum != request.declared_total {
+            panic_with_error!(&env, Error::SumMismatch);
+        }
     }
 }
 
