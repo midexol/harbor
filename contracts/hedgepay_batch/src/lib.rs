@@ -20,6 +20,16 @@ pub enum Error {
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DataKey {
+    Admin,
+    Treasury,
+    Token,
+    MaxBatchSize,
+    BatchCounter,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PayoutItem {
     pub payee: Address,
     pub amount: i128,
