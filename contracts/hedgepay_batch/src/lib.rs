@@ -1,5 +1,22 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Env, Symbol, Vec, panic_with_error};
+use soroban_sdk::{contract, contractimpl, contracttype, contracterror, symbol_short, Address, Env, Symbol, Vec, panic_with_error};
+
+#[contracterror]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[repr(u32)]
+pub enum Error {
+    NotInitialized = 1,
+    AlreadyInitialized = 2,
+    Unauthorized = 3,
+    SumMismatch = 4,
+    EmptyBatch = 5,
+    BatchSizeExceeded = 6,
+    InvalidAdmin = 7,
+    InvalidTreasury = 8,
+    InvalidToken = 9,
+    InvalidRecipient = 10,
+    InvalidAmount = 11,
+}
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
