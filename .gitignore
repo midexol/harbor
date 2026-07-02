@@ -34,3 +34,9 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.swp
+
+# Rust / Cargo
+target/
+**/*.rs.bk
+Cargo.lock
+
