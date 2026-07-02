@@ -28,6 +28,8 @@ fn setup_test_context() -> TestContext {
     let contract_id = env.register_contract(None, HedgePayBatch);
     let contract_client = HedgePayBatchClient::new(&env, &contract_id);
 
+    contract_client.initialize(&admin, &treasury, &token_address);
+
     TestContext {
         env,
         admin,
