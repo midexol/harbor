@@ -67,6 +67,10 @@ impl HedgePayBatch {
     pub fn treasury(env: Env) -> Option<Address> {
         get_treasury(&env)
     }
+
+    pub fn token(env: Env) -> Option<Address> {
+        get_token(&env)
+    }
 }
 
 fn get_admin(env: &Env) -> Option<Address> {
