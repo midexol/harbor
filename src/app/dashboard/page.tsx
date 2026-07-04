@@ -327,7 +327,7 @@ export default function HarborOverview() {
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px' }}>
                 <div>
                   <span style={{ color: 'rgba(255,255,255,0.4)', display: 'block' }}>CARD HOLDER</span>
-                  <span style={{ fontWeight: '600' }}>OLAMIDE ADESINA</span>
+                  <span style={{ fontWeight: '600' }}>JOHN DOE</span>
                 </div>
                 <div>
                   <span style={{ color: 'rgba(255,255,255,0.4)', display: 'block' }}>EXPIRES</span>
