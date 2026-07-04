@@ -1,0 +1,12 @@
+{
+  "project_name": "HedgePay",
+  "target_network": "stellar:testnet",
+  "contracts": [
+    {
+      "name": "hedgepay_batch",
+      "address": "CD4U2T3X5K7G2J6L4A8B9Z1Y0W_MOCK_CONTRACT_ID",
+      "verified": false,
+      "deployed_at": "2026-07-04T00:00:00Z"
+    }
+  ]
+}
