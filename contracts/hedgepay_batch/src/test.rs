@@ -191,4 +191,22 @@ fn test_unauthorized_config_changes() {
     contract_client.update_admin(&bad_actor);
 }
 
+#[test]
+fn test_authorized_config_updates() {
+    let ctx = setup_test_context();
+
+    let new_admin = Address::generate(&ctx.env);
+    let new_treasury = Address::generate(&ctx.env);
+
+    // Update config (mock_all_auths is enabled in setup_test_context)
+    ctx.contract_client.update_admin(&new_admin);
+    ctx.contract_client.update_treasury(&new_treasury);
+    ctx.contract_client.update_max_batch(&100);
+
+    // Verify changes
+    assert_eq!(ctx.contract_client.admin(), Some(new_admin));
+    assert_eq!(ctx.contract_client.treasury(), Some(new_treasury));
+    assert_eq!(ctx.contract_client.max_batch_size(), 100);
+}
+
 
