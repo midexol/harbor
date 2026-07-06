@@ -1,6 +1,6 @@
 # Harbor // Borderless Freelancer & Agency Banking on Stellar
 
-Harbor is a high-performance, enterprise-grade B2B batch payroll distribution protocol and cross-border bank routing routing gateway built for the Stellar network using Soroban smart contracts. 
+Harbor is a high-performance, enterprise-grade B2B batch payroll distribution protocol and cross-border bank routing gateway built for the Stellar network using Soroban smart contracts. 
 
 The protocol is designed specifically to eliminate cross-border settlement latency, intermediary SWIFT wire charges, and currency conversion markups for remote contractors, freelancers, and global agencies operating in emerging markets (including the Philippines, Indonesia, Vietnam, and Nigeria).
 
@@ -8,6 +8,7 @@ The protocol is designed specifically to eliminate cross-border settlement laten
 
 ## 🚀 Core Value Proposition & Mechanics
 
+*   **Invoice-Driven Pull Payroll:** Harbor replaces traditional push payroll sheets with a pull-model billing hub. Contractors generate cryptographically clear billing request links; clients load these pending invoices directly into their portal queue to approve and settle them in a single batch transaction.
 *   **Gas-Optimized Batch Routing:** Traditional on-chain payout loops are gas-intensive. Harbor leverages Soroban's optimized memory model to parse arrays, enabling an employer to fund a single batch transaction that distributes salaries to dozens of unique contractor wallets simultaneously.
 *   **On-Chain DEX Path-Payments:** Harbor features a multi-asset swap router interface. If a contractor requests payouts in a non-USDC asset (e.g. native XLM or EURC), the contract automatically approves and routes the deposit through a DEX swap before transferring the funds.
 *   **Anti-Frontrunning Reconciliation:** To prevent frontrunning or database out-of-sync exploits, the smart contract dynamically calculates array sums on-chain and verifies them against the submitted `declared_total`. If a parameter mismatch is detected, the transaction explicitly reverts.
@@ -19,8 +20,8 @@ The protocol is designed specifically to eliminate cross-border settlement laten
 
 ```mermaid
 graph TD
-    A[HR Payroll Admin] -->|Upload Payout CSV| B[Harbor Web Interface]
-    B -->|Submit Batch Payload| C[Soroban Smart Contract]
+    A[Contractor / Payee] -->|Generate Request Link| B[Harbor Invoices Hub]
+    B -->|Settle Batch Invoices| C[Soroban Smart Contract]
     C -->|Pull USDC| D[Treasury Escrow Vault]
     C -->|Calculate & Verify Sums| E{Balance Match?}
     E -->|No| F[Revert Transaction]
@@ -52,17 +53,17 @@ harbor/
 │   ├── app/                    <-- Next.js layout, routing, and UI dashboard screens
 │   │   ├── dashboard/          <-- Overview page with transaction simulation sandbox
 │   │   ├── ledger/             <-- Audit logs with StellarExplorer links
-│   │   ├── recipients/         <-- Contractor registry database
+│   │   ├── invoices/           <-- Contractor invoice builder and client batch settlement hub
 │   │   ├── settings/           <-- Profile coordinates, API keys, and confirmation modals
 │   │   └── vaults/             <-- Draggable split allocator and APY ticking widgets
-│   └── components/             <-- Shared components (CSV upload logic, tables)
+│   └── components/             <-- Shared components (tables, layout dividers)
 ├── CONTRIBUTING.md             <-- Developer setup guidelines & FOSS Wave issues
 ├── FUNDING.json                <-- Stellar FOSS verify configuration file
 ├── Cargo.toml                  <-- Root Cargo workspace configuration
 └── README.md                   <-- Main project documentation
 ```
 
-
+---
 
 ## 🛠️ Local Developer Setup
 
@@ -96,5 +97,4 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser to inter
 
 Harbor is proudly participating as an active project in the **Stellar Drips Wave Program**. 
 *   To start contributing, review our setup instructions, coding conventions, and PR workflow in our **[Contribution Guidelines (CONTRIBUTING.md)](file:///c:/Users/olamide/Desktop/Hedgepay/CONTRIBUTING.md)**.
-*   View our active issue backlog listed in `CONTRIBUTING.md` to claim tasks (ranging from Trivial React styling fixes to High-complexity Multi-Sig smart contract implementations) and earn USDC rewards.
-
+*   View our active issue backlog listed in `CONTRIBUTING.md` to claim tasks (ranging from gasless transactions to compliance address checking) and earn USDC rewards.

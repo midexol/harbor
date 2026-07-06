@@ -31,7 +31,7 @@ Run the unit test suite:
 ```bash
 cargo test
 ```
-*Note for Windows users:* If compilation macro libraries fail due to MinGW path references, ensure you append the Rust GNU self-contained bin path to your shell environment `$env:PATH`.
+*Note for Windows users:* If compilation macro libraries fail due to MinGW path references, ensure you verify build outputs directly targeting webassembly: `cargo build --target wasm32-unknown-unknown --release`.
 
 ### 2. Frontend Dashboard Setup
 Navigate to the root directory and install dependencies:
@@ -60,7 +60,7 @@ npx tsc --noEmit
 4.  **Commit Conventions:** We prefer clean, organic commit messages:
     *   `fixed typos in settings layout`
     *   `added ledger details copy trigger`
-5.  **Submit PR:** Submit your pull request targeting the `main` branch. Ensure you fill out the details in the provided `PULL_REQUEST_TEMPLATE.md`.
+5.  **Submit PR:** Submit your pull request targeting the `main` branch. Ensure you fill out the details in the provided `.github/PULL_REQUEST_TEMPLATE.md`.
 
 ---
 
@@ -68,10 +68,10 @@ npx tsc --noEmit
 
 For the active **Stellar Drips Wave** sprint, contributors can claim the following scoped protocol engineering issues:
 
-### 1. [HIGH] Integrate DEX Path-Payments for Multi-Asset Splits
-*   **Goal:** Implement a path-payment swap router inside the Soroban Rust contract. When a USD direct deposit is cleared, allow splits to automatically swap a portion to XLM, EURC, or other Stellar-native assets using a path-payment routing swap or AMM interface (like Soroswap) before executing payouts.
-*   **Target Files:** `contracts/hedgepay_batch/src/lib.rs` & `test.rs`
-*   **Required Skills:** Rust, AMM protocols, Stellar Path Payments, checked arithmetic.
+### 1. [COMPLETED & SHIPPED] Integrate DEX Path-Payments for Multi-Asset Splits
+*   **Status:** Resolved in `main` branch.
+*   **Resolution Details:** Upgraded `lib.rs` and `test.rs` to configure `DexRouter` coordinates. Payout items now accept `target_token` parameter. The smart contract automatically approves the DEX router and routes deposits through DEX swaps before final recipient transfers.
+*   **Shipped Files:** `contracts/hedgepay_batch/src/lib.rs` & `test.rs`
 
 ### 2. [HIGH] Implement Soroban Fee-Sponsorship / Fee-Bump Integration
 *   **Goal:** Allow gasless onboarding for remote contractors by letting Harbor's treasury address sponsor the transaction resources and fees. Construct fee-bump transaction wrappers in the relayer subscriber client.
