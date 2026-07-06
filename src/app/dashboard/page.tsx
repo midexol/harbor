@@ -125,6 +125,10 @@ export default function HarborOverview() {
                   new xdr.ScMapEntry({
                     key: xdr.ScVal.scvSymbol("department"),
                     val: xdr.ScVal.scvSymbol(selectedCorridor.toUpperCase())
+                  }),
+                  new xdr.ScMapEntry({
+                    key: xdr.ScVal.scvSymbol("target_token"),
+                    val: xdr.ScVal.scvVoid()
                   })
                 ])
               ];

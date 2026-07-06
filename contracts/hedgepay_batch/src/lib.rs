@@ -1,5 +1,8 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, contracterror, symbol_short, Address, Env, Symbol, Vec, panic_with_error, token::Client as TokenClient};
+use soroban_sdk::{
+    contract, contractimpl, contracttype, contracterror, contractclient, symbol_short, 
+    Address, Env, Symbol, Vec, panic_with_error, token::Client as TokenClient
+};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -26,6 +29,7 @@ pub enum DataKey {
     Token,
     MaxBatchSize,
     BatchCounter,
+    DexRouter,
 }
 
 #[contracttype]
@@ -34,6 +38,7 @@ pub struct PayoutItem {
     pub payee: Address,
     pub amount: i128,
     pub department: Symbol,
+    pub target_token: Option<Address>, // None defaults to the base settlement token (USDC)
 }
 
 #[contracttype]
@@ -42,6 +47,12 @@ pub struct BatchRequest {
     pub items: Vec<PayoutItem>,
     pub declared_total: i128,
     pub batch_id: u64,
+}
+
+// Generate client dynamically for external DEX router communication
+#[contractclient(name = "DexRouterClient")]
+pub trait DexRouter {
+    fn swap(env: Env, from_token: Address, to_token: Address, amount: i128, recipient: Address) -> i128;
 }
 
 #[contract]
@@ -80,6 +91,10 @@ impl HedgePayBatch {
         get_batch_counter(&env)
     }
 
+    pub fn dex_router(env: Env) -> Option<Address> {
+        get_dex_router(&env)
+    }
+
     pub fn update_admin(env: Env, new_admin: Address) {
         let admin = get_admin(&env).unwrap_or_else(|| {
             panic_with_error!(&env, Error::NotInitialized);
@@ -102,6 +117,14 @@ impl HedgePayBatch {
         });
         admin.require_auth();
         set_max_batch_size(&env, new_max);
+    }
+
+    pub fn update_dex_router(env: Env, new_router: Address) {
+        let admin = get_admin(&env).unwrap_or_else(|| {
+            panic_with_error!(&env, Error::NotInitialized);
+        });
+        admin.require_auth();
+        set_dex_router(&env, &new_router);
     }
 
     pub fn execute_batch_payroll(env: Env, request: BatchRequest) {
@@ -146,9 +169,30 @@ impl HedgePayBatch {
             &request.declared_total,
         );
 
-        // Distribute tokens to individual payees
+        // Distribute tokens to individual payees, triggering optional swaps where needed
         for item in request.items.iter() {
-            token_client.transfer(&env.current_contract_address(), &item.payee, &item.amount);
+            let mut is_swapped = false;
+            
+            if let Option::Some(target_token_addr) = &item.target_token {
+                if target_token_addr != &token_addr {
+                    let router_addr = get_dex_router(&env).unwrap_or_else(|| {
+                        panic_with_error!(&env, Error::NotInitialized);
+                    });
+                    
+                    // Approve router to spend contract's base tokens for swap execution
+                    let expiration = env.ledger().sequence() + 100;
+                    token_client.approve(&env.current_contract_address(), &router_addr, &item.amount, &expiration);
+
+                    // Execute swap and route directly to payee
+                    let dex_client = DexRouterClient::new(&env, &router_addr);
+                    dex_client.swap(&token_addr, target_token_addr, &item.amount, &item.payee);
+                    is_swapped = true;
+                }
+            }
+
+            if !is_swapped {
+                token_client.transfer(&env.current_contract_address(), &item.payee, &item.amount);
+            }
             
             // Emit payout_logged event
             env.events().publish(
@@ -209,7 +253,13 @@ fn set_batch_counter(env: &Env, counter: u64) {
     env.storage().persistent().set(&DataKey::BatchCounter, &counter);
 }
 
+fn get_dex_router(env: &Env) -> Option<Address> {
+    env.storage().instance().get(&DataKey::DexRouter)
+}
+
+fn set_dex_router(env: &Env, router: &Address) {
+    env.storage().instance().set(&DataKey::DexRouter, router);
+}
+
 #[cfg(test)]
 mod test;
-
-

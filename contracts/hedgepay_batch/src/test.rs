@@ -1,6 +1,28 @@
 #![cfg(test)]
 use super::*;
-use soroban_sdk::{Env, Address, testutils::Address as _, token::Client as TokenClient, token::StellarAssetClient};
+use soroban_sdk::{
+    Env, Address, testutils::Address as _, token::Client as TokenClient, 
+    token::StellarAssetClient
+};
+
+#[contract]
+pub struct MockDexRouter;
+
+#[contractimpl]
+impl MockDexRouter {
+    pub fn swap(env: Env, from_token: Address, to_token: Address, amount: i128, recipient: Address) -> i128 {
+        // Verify from_token has transfer approval (DEX transfers from caller contract to itself)
+        // Since mock_all_auths is enabled, we simulate the swap:
+        // 1. Transfer from_token from the batch payroll contract (which is caller) to the DEX
+        // In a mock, we can just do nothing on from_token transfer, or call transfer_from:
+        let from_client = TokenClient::new(&env, &from_token);
+        
+        // 2. Transfer target token from DEX to the recipient
+        let to_client = TokenClient::new(&env, &to_token);
+        to_client.transfer(&env.current_contract_address(), &recipient, &amount);
+        amount
+    }
+}
 
 struct TestContext {
     env: Env,
@@ -59,11 +81,13 @@ fn test_successful_batch_payout() {
         payee: payee1.clone(),
         amount: 300,
         department: symbol_short!("ENG"),
+        target_token: Option::None,
     });
     items.push_back(PayoutItem {
         payee: payee2.clone(),
         amount: 700,
         department: symbol_short!("HR"),
+        target_token: Option::None,
     });
 
     let request = BatchRequest {
@@ -85,6 +109,70 @@ fn test_successful_batch_payout() {
 }
 
 #[test]
+fn test_multi_asset_swap_payout() {
+    let ctx = setup_test_context();
+
+    let payee1 = Address::generate(&ctx.env); // Direct USDC recipient
+    let payee2 = Address::generate(&ctx.env); // Swap recipient (requesting EURC)
+
+    // Mint USDC base tokens to treasury
+    ctx.token_admin_client.mint(&ctx.treasury, &1000);
+
+    // Register a secondary token (EURC mock)
+    let target_token_admin = Address::generate(&ctx.env);
+    let target_token_address = ctx.env.register_stellar_asset_contract(target_token_admin.clone());
+    let target_token_client = TokenClient::new(&ctx.env, &target_token_address);
+    let target_token_admin_client = StellarAssetClient::new(&ctx.env, &target_token_address);
+
+    // Deploy mock DEX router contract
+    let router_id = ctx.env.register_contract(None, MockDexRouter);
+    
+    // Set DEX router inside the batch payroll contract
+    ctx.contract_client.update_dex_router(&router_id);
+    assert_eq!(ctx.contract_client.dex_router(), Option::Some(router_id.clone()));
+
+    // Seed target tokens (EURC) into the mock DEX router
+    target_token_admin_client.mint(&router_id, &1000);
+    assert_eq!(target_token_client.balance(&router_id), 1000);
+
+    // Create batch items (payee2 requests swaps to EURC target token)
+    let mut items = Vec::new(&ctx.env);
+    items.push_back(PayoutItem {
+        payee: payee1.clone(),
+        amount: 400,
+        department: symbol_short!("ENG"),
+        target_token: Option::None,
+    });
+    items.push_back(PayoutItem {
+        payee: payee2.clone(),
+        amount: 600,
+        department: symbol_short!("MKT"),
+        target_token: Option::Some(target_token_address.clone()),
+    });
+
+    let request = BatchRequest {
+        items,
+        declared_total: 1000,
+        batch_id: 1,
+    };
+
+    // Execute batch payroll
+    ctx.contract_client.execute_batch_payroll(&request);
+
+    // Verify treasury has been depleted of USDC
+    assert_eq!(ctx.token_client.balance(&ctx.treasury), 0);
+
+    // Verify payee1 received 400 USDC directly
+    assert_eq!(ctx.token_client.balance(&payee1), 400);
+
+    // Verify payee2 received NO USDC
+    assert_eq!(ctx.token_client.balance(&payee2), 0);
+
+    // Verify payee2 received 600 EURC from swap execution
+    assert_eq!(target_token_client.balance(&payee2), 600);
+}
+
+#[test]
 #[should_panic(expected = "HostError: Error(Contract, #4)")]
 fn test_sum_mismatch_too_high() {
     let ctx = setup_test_context();
@@ -97,6 +185,7 @@ fn test_sum_mismatch_too_high() {
         payee: payee1,
         amount: 1000,
         department: symbol_short!("ENG"),
+        target_token: Option::None,
     });
 
     let request = BatchRequest {
@@ -121,6 +210,7 @@ fn test_sum_mismatch_too_low() {
         payee: payee1,
         amount: 1000,
         department: symbol_short!("ENG"),
+        target_token: Option::None,
     });
 
     let request = BatchRequest {
@@ -161,6 +251,7 @@ fn test_batch_size_limit_overflow() {
             payee: payee.clone(),
             amount: 10,
             department: symbol_short!("ENG"),
+            target_token: Option::None,
         });
     }
 
@@ -208,5 +299,3 @@ fn test_authorized_config_updates() {
     assert_eq!(ctx.contract_client.treasury(), Some(new_treasury));
     assert_eq!(ctx.contract_client.max_batch_size(), 100);
 }
-
-
