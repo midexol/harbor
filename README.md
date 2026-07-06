@@ -46,9 +46,3 @@ harbor/
 ```
 
 ---
-
-## 📂 Contributing & Drips Wave Program
-
-Harbor is participating in the **Stellar Drips Wave Program** as an open-source project. If you are looking to contribute:
-*   Read our setup, coding style, and PR process in the **[Contribution Guidelines (CONTRIBUTING.md)](file:///c:/Users/olamide/Desktop/Hedgepay/CONTRIBUTING.md)**.
-*   Review our active backlog issues list in `CONTRIBUTING.md` to claim tasks and earn contribution points.
