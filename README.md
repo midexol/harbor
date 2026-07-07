@@ -93,8 +93,8 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser to inter
 
 ---
 
-## 🗳️ Open Source Contribution & Drips Waves
+## 🗳️ Open Source Contribution 
 
-Harbor is proudly participating as an active project in the **Stellar Drips Wave Program**. 
+ 
 *   To start contributing, review our setup instructions, coding conventions, and PR workflow in our **[Contribution Guidelines (CONTRIBUTING.md)](file:///c:/Users/olamide/Desktop/Hedgepay/CONTRIBUTING.md)**.
-*   View our active issue backlog listed in `CONTRIBUTING.md` to claim tasks (ranging from gasless transactions to compliance address checking) and earn USDC rewards.
+*   View our active issue backlog listed in `CONTRIBUTING.md` to claim tasks (ranging from gasless transactions to compliance address checking) 
